@@ -212,7 +212,7 @@ def create_class_balance_df(x_dictionary, label_col, columns):
 
 #Function to fit model to data for each ticker and return as dictionary
 
-def model_dict(x_dict, shuffle = True):
+def model_dict(x_dict, **kwargs):
     """ Fits model to each item in input dictionary.
         Returns dictionary object. """
         
@@ -220,17 +220,14 @@ def model_dict(x_dict, shuffle = True):
     
     for ticker in x_dict.keys():
         
-        print(ticker)
         df = x_dict[ticker]
-        
-        
         
         X = df[['sale_num','buy_num']]
         Y = df.risk_dummy
-        x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size = 0.2, shuffle = shuffle)
+        x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size = 0.2, shuffle = kwargs['shuffle'])
         
-        rf = ensemble.RandomForestClassifier(oob_score = True, n_jobs = -1, n_estimators = 100)
-        
+        rf = ensemble.RandomForestClassifier(oob_score = True, n_jobs = -1, n_estimators = 300)
+
         result = rf.fit(x_train,y_train)
         prediction = rf.predict(x_test)
         

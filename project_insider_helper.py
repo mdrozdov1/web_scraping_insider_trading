@@ -86,7 +86,10 @@ def get_stocks(x_dict):
         
 #Function to clean fetched stock data dictionary
 
-def clean_stocks(x_dict):    
+def clean_stocks(x_dict):
+    """ Reindexes time/date for each item in stock data dictionary. Calculates standard deviation of weekly return.
+        Returns a dictionary object. """
+
     stocks_dict = {}
     
     for item in x_dict.keys():
@@ -103,6 +106,9 @@ def clean_stocks(x_dict):
 #Function to merge insider trading data and stocks data dictionaries
 
 def merge_dicts(x,y):
+    """ Merges item for item in stock data dictionary and insiders trading data dictionary. Performs some final cleaning.
+        Returns a dictionary object. """
+
     full_dict = {}
     x_dict = x
     y_dict = y
@@ -150,6 +156,8 @@ def merge_dicts(x,y):
 #Function to plot a sample of stocks adjusted close price over time with vertical lines indicating insider trades
 
 def plot_dict(insider_dict,stocks_dict,choose = 10):
+    """ Chooses a random sample of stocks. Plots Adjusted Close price for chosen sample over entire date range and places vertical lines indicating insider trading activity. """
+
     fig = plt.figure(figsize=(20,15))
     
     tickers = np.random.choice(list(insider_dict.keys()),choose, replace=False)
@@ -172,6 +180,9 @@ def plot_dict(insider_dict,stocks_dict,choose = 10):
 #Function to create a dataframe indicating the count of low and high risk observations per ticker plus their totals
 
 def create_class_balance_df(x_dictionary, binary_label_col, columns):
+    """ Calculate the number of high risk and low risk occurences as well as totals for each ticker in input dictionary.
+        Returns a pandas DataFrame object. """
+
     ticker_dict = {}
 
     for ticker in x_dictionary.keys():
@@ -198,6 +209,9 @@ def create_class_balance_df(x_dictionary, binary_label_col, columns):
 #Function to fit model to data for each ticker and return as dictionary
 
 def model_dict(x_dict, shuffle = True):
+    """ Fits model to each item in input dictionary.
+        Returns dictionary object. """
+        
     fit_dict = {}
     
     for ticker in x_dict.keys():

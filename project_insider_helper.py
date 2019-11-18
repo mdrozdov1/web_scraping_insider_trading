@@ -106,7 +106,7 @@ def clean_stocks(x_dict):
 #Function to merge insider trading data and stocks data dictionaries
 
 def merge_dicts(x,y):
-    """ Merges item for item in stock data dictionary and insiders trading data dictionary. Performs some final cleaning.
+    """ Merges item for item in stock data dictionary and insiders trading data dictionary. Performs some final cleaning including dropping NA values.
         Returns a dictionary object. """
 
     full_dict = {}
@@ -146,7 +146,10 @@ def merge_dicts(x,y):
 
                     full_df = full_df.dropna()
                     
+                    full_df = full_df.drop(['shares_traded','total_price'], axis = 1)
+                    
                     full_dict[ticker] = full_df
+
 
                 except:
                     print(f'error on ticker:{ticker}')
@@ -179,7 +182,7 @@ def plot_dict(insider_dict,stocks_dict,choose = 10):
                     
 #Function to create a dataframe indicating the count of low and high risk observations per ticker plus their totals
 
-def create_class_balance_df(x_dictionary, binary_label_col, columns):
+def create_class_balance_df(x_dictionary, label_col, columns):
     """ Calculate the number of high risk and low risk occurences as well as totals for each ticker in input dictionary.
         Returns a pandas DataFrame object. """
 
@@ -202,7 +205,8 @@ def create_class_balance_df(x_dictionary, binary_label_col, columns):
     class_balance_df = pd.DataFrame(list(zip(ticker_list,zeros_list,ones_list)), columns = columns)
     class_balance_df.set_index('Ticker')
     class_balance_df['Sample_Size'] = np.where(pd.isna(class_balance_df.Low_Risk + class_balance_df.High_Risk) != True,class_balance_df.Low_Risk + class_balance_df.High_Risk, class_balance_df.Low_Risk) 
-    
+    class_balance_df['Low_Risk_Pct'] = class_balance_df.Low_Risk / class_balance_df.Sample_Size * 100
+    class_balance_df['High_Risk_Pct'] = class_balance_df.High_Risk / class_balance_df.Sample_Size * 100
     
     return class_balance_df
 

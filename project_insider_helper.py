@@ -241,14 +241,16 @@ def model_fit(x_dict, model_list,**kwargs):
                 rf.fit(x_train, y_train, sample_weights)
                 prediction = rf.predict(x_test)
                 accuracy = accuracy_score(y_test, prediction)
-                rf_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy, 'baseline':baseline}
+                roc = roc_auc_score(y_test, prediction)
+                rf_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy, 'baseline':baseline, 'auc':roc}
 
             elif model == 'gbm':
                 gbm = ensemble.GradientBoostingClassifier(max_features='auto', n_estimators = kwargs['n_estimators'])
                 gbm.fit(x_train, y_train, sample_weights)
                 prediction = gbm.predict(x_test)
                 accuracy = accuracy_score(y_test, prediction)
-                gbm_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy, 'baseline':baseline}
+                roc = roc_auc_score(y_test, prediction)
+                gbm_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy, 'baseline':baseline, 'auc':roc}
 
             elif model == 'svm':
                 svm_fit = svm.SVC(class_weight = kwargs['class_weight'], gamma = 'auto')
@@ -257,7 +259,8 @@ def model_fit(x_dict, model_list,**kwargs):
                 svm_fit.fit(x_train, y_train)
                 prediction = svm_fit.best_estimator_.predict(x_test)
                 accuracy = accuracy_score(y_test, prediction)
-                svm_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy, 'baseline':baseline}
+                roc = roc_auc_score(y_test, prediction)
+                svm_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy, 'baseline':baseline, 'auc':roc}
 
     models_dict = {'rf':rf_dict, 'gbm':gbm_dict, 'svm':svm_dict}
 

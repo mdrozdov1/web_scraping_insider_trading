@@ -5,6 +5,7 @@ from datetime import timedelta
 import seaborn as sns
 from matplotlib import pyplot as plt
 from sklearn import ensemble
+from sklearn import svm
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score, roc_auc_score
@@ -248,6 +249,15 @@ def model_fit(x_dict, model_list,**kwargs):
                 prediction = gbm.predict(x_test)
                 accuracy = accuracy_score(y_test, prediction)
                 gbm_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy, 'baseline':baseline}
+
+            elif model == 'svm':
+                svm_fit = svm.SVC(class_weight = kwargs['class_weight'], gamma = 'auto')
+                param_grid  = {'C':np.arange(1,10), 'degree':np.arange(1,10), 'kernel':['poly','sigmoid','rbf']}
+                svm_fit = GridSearchCV(svm_fit, param_grid, cv = 5, n_jobs = -1, iid = False)
+                svm_fit.fit(x_train, y_train)
+                prediction = svm_fit.best_estimator_.predict(x_test)
+                accuracy = accuracy_score(y_test, prediction)
+                svm_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy, 'baseline':baseline}
 
     models_dict = {'rf':rf_dict, 'gbm':gbm_dict, 'svm':svm_dict}
 

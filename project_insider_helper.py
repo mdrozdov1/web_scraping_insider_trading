@@ -6,7 +6,9 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from sklearn import ensemble
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score, roc_auc_score
+from sklearn.utils.class_weight import compute_sample_weight
 
 #File reader function
 
@@ -183,8 +185,8 @@ def plot_dict(insider_dict,stocks_dict,choose = 10):
 #Function to create a dataframe indicating the count of low and high risk observations per ticker plus their totals
 
 def create_class_balance_df(x_dictionary, label_col, columns):
-    """ Calculate the number of high risk and low risk occurences as well as totals for each ticker in input dictionary.
-        Returns a pandas DataFrame object. """
+    """ Calculates the number of high risk and low risk occurences as well as totals for each ticker in input dictionary.
+        Returns a pandas DataFrame object. *!Check for NaNs!* """
 
     ticker_dict = {}
 
@@ -212,7 +214,7 @@ def create_class_balance_df(x_dictionary, label_col, columns):
 
 #Function to fit model to data for each ticker and return as dictionary
 
-def model_dict(x_dict, model_list,**kwargs):
+def model_fit(x_dict, model_list,**kwargs):
     """ Fits model to each item in input dictionary.
         Returns dictionary object. """
         
@@ -228,18 +230,29 @@ def model_dict(x_dict, model_list,**kwargs):
                         
             X = np.array(df[['sale_num','buy_num']])
             Y = np.array(df['risk_dummy'])
-            x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size = kwargs['test_size'], shuffle = kwargs['shuffle'])
+            x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size = kwargs['test_size'], stratify = Y)
+            class_counts = np.unique(y_test,return_counts=True)
+            baseline = max(class_counts[1])/sum(class_counts[1])
+            sample_weights = compute_sample_weight('balanced',y_train)
 
             if model == 'rf':
                 rf = ensemble.RandomForestClassifier(n_jobs = -1, n_estimators = kwargs['n_estimators'], class_weight  = kwargs['class_weight'])
-                rf.fit(x_train,y_train)
+                rf.fit(x_train, y_train, sample_weights)
                 prediction = rf.predict(x_test)
                 accuracy = accuracy_score(y_test, prediction)
-                rf_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy}
-        
+                rf_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy, 'baseline':baseline}
+
+            elif model == 'gbm':
+                gbm = ensemble.GradientBoostingClassifier(max_features='auto', n_estimators = kwargs['n_estimators'])
+                gbm.fit(x_train, y_train, sample_weights)
+                prediction = gbm.predict(x_test)
+                accuracy = accuracy_score(y_test, prediction)
+                gbm_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy, 'baseline':baseline}
+
     models_dict = {'rf':rf_dict, 'gbm':gbm_dict, 'svm':svm_dict}
 
     return models_dict
+
 
 
         

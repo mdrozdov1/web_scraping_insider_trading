@@ -212,29 +212,34 @@ def create_class_balance_df(x_dictionary, label_col, columns):
 
 #Function to fit model to data for each ticker and return as dictionary
 
-def model_dict(x_dict, **kwargs):
+def model_dict(x_dict, model_list,**kwargs):
     """ Fits model to each item in input dictionary.
         Returns dictionary object. """
         
-    fit_dict = {}
+    rf_dict = {}
+    gbm_dict = {}
+    svm_dict = {}
     
-    for ticker in x_dict.keys():
-        
-        df = x_dict[ticker]
-        
-        X = df[['sale_num','buy_num']]
-        Y = df.risk_dummy
-        x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size = 0.2, shuffle = kwargs['shuffle'])
-        
-        rf = ensemble.RandomForestClassifier(oob_score = True, n_jobs = -1, n_estimators = 300)
+    for model in model_list:
 
-        result = rf.fit(x_train,y_train)
-        prediction = rf.predict(x_test)
+        for ticker in x_dict.keys():
+            
+            df = x_dict[ticker]
+                        
+            X = np.array(df[['sale_num','buy_num']])
+            Y = np.array(df['risk_dummy'])
+            x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size = kwargs['test_size'], shuffle = kwargs['shuffle'])
+
+            if model == 'rf':
+                rf = ensemble.RandomForestClassifier(n_jobs = -1, n_estimators = kwargs['n_estimators'], class_weight  = kwargs['class_weight'])
+                rf.fit(x_train,y_train)
+                prediction = rf.predict(x_test)
+                accuracy = accuracy_score(y_test, prediction)
+                rf_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy}
         
-        fit_dict[ticker]= result,prediction,y_test
-        
-        
-    return fit_dict
+    models_dict = {'rf':rf_dict, 'gbm':gbm_dict, 'svm':svm_dict}
+
+    return models_dict
 
 
         

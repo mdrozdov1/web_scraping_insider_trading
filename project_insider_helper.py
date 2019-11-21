@@ -243,7 +243,7 @@ def model_fit(x_dict, model_list,**kwargs):
                 accuracy = accuracy_score(y_test, prediction)
                 roc = roc_auc_score(y_test, prediction)
                 recall = recall_score(y_test, prediction)
-                rf_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy, 'baseline':baseline, 'auc':roc,, 'recall':recall}
+                rf_dict[ticker] = {'prediction':prediction, 'accuracy':accuracy, 'baseline':baseline, 'auc':roc, 'recall':recall}
 
             elif model == 'gbm':
                 gbm = ensemble.GradientBoostingClassifier(max_features='auto', n_estimators = kwargs['n_estimators'])
